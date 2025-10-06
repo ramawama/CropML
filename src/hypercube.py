@@ -87,6 +87,7 @@ with rasterio.open(qa_file) as src:
     qa = src.read(1)
     profile = src.profile
 
+
 qa_mask_arr = (qa_mask(qa,'cloud') | qa_mask(qa,'fill') | qa_mask(qa, 'snow') | qa_mask(qa, 'shadow'))
 # print(qa_mask_arr)
 
@@ -174,6 +175,4 @@ print("Valid proportion:", np.mean(~np.isnan(reflectance))) # how many pixels ar
 print(reflectance.shape)
 # (7, 5000, 5000) (band, y, x). each pixel has a 7 band vector describing vector
 
-np.savez_compressed('outputs/reflectance_016003.npy', reflectance)
-# Align CDL and Reflectance 
-cdl_dir = Path('data/raw/cdl/2024_30m_cdls/2024_30m_cdls.tif')
+np.savez_compressed('outputs/reflectance_016003', hypercube=reflectance, hyper_profile=np.array([profile], dtype=object))
