@@ -174,6 +174,6 @@ print("Valid proportion:", np.mean(~np.isnan(reflectance))) # how many pixels ar
 print(reflectance.shape)
 # (7, 5000, 5000) (band, y, x). each pixel has a 7 band vector describing vector
 
-np.save('outputs/reflectance_016003.npy', reflectance)
+np.savez_compressed('outputs/reflectance_016003.npy', reflectance)
 # Align CDL and Reflectance 
 cdl_dir = Path('data/raw/cdl/2024_30m_cdls/2024_30m_cdls.tif')
