@@ -87,8 +87,9 @@ with rasterio.open(qa_file) as src:
     qa = src.read(1)
     profile = src.profile
 
-qa_mask_arr = (qa_mask(qa,'cloud') | qa_mask(qa,'snow') | qa_mask(qa,'shadow'))
-print(qa_mask_arr)
+qa_mask_arr = (qa_mask(qa,'cloud') | qa_mask(qa,'fill') | qa_mask(qa, 'snow') | qa_mask(qa, 'shadow'))
+# print(qa_mask_arr)
+
 
 sepctral_bands = []
 for b in band_files:
@@ -135,3 +136,44 @@ axes[1].axis("off")
 
 plt.show()
 
+# ML
+
+# feature stack (what you train on): float32 reflectance with NaNs for masked pixels
+features = sepctral_bands.astype("float32") 
+features = np.where(qa_mask_broadcasted, np.nan, features)   # NO in-place edits
+# --- Quick checks to prove stretching didn't alter features ---
+print("Features shape:", features.shape, "dtype:", features.dtype)
+print("Feature band mins/maxes (ignore NaN):",
+      [ (np.nanmin(features[i]), np.nanmax(features[i])) for i in [1,2,3] ])
+
+print(spectral_array_masked)
+
+reflectance = (spectral_array_masked * 0.0000275) - 0.2
+reflectance[spectral_array_masked == 0] = np.nan  
+
+print(reflectance)
+
+print("Reflectance range:", np.nanmin(reflectance), np.nanmax(reflectance))
+print("Proportion NaN:", np.mean(np.isnan(reflectance)))
+print("vals less than 0: ", (reflectance < 0).sum())
+print("vals more than 1: ", (reflectance > 1).sum())
+
+qa_any = qa_mask(qa, 'cloud') | qa_mask(qa, 'shadow')
+print("Pixels flagged by QA:", qa_any.sum(), "/", qa_any.size, f"({100*qa_any.mean():.2f}%)")
+
+# Compare against your reflectance NaNs:
+nan_mask = np.isnan(reflectance[0])  # pick one band
+print("NaN pixels (any band):", nan_mask.sum(), "/", nan_mask.size, f"({100*nan_mask.mean():.2f}%)")
+
+# Mask non-physical reflectance values
+reflectance[(reflectance < 0) | (reflectance > 1)] = np.nan
+
+print("After range screen:")
+print("Valid proportion:", np.mean(~np.isnan(reflectance))) # how many pixels are valid
+
+print(reflectance.shape)
+# (7, 5000, 5000) (band, y, x). each pixel has a 7 band vector describing vector
+
+
+# Align CDL and Reflectance 
+cdl_dir = Path('data/raw/cdl/2024_30m_cdls/2024_30m_cdls.tif')
