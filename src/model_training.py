@@ -2,7 +2,6 @@ import numpy as np
 import rasterio
 import json
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -80,12 +79,8 @@ test_n = int(0.2 * n)
 X_train, X_test = X_small[:-test_n], X_small[-test_n:]
 y_train, y_test = y_small[:-test_n], y_small[-test_n:]
 
-# Train RF (trees don’t need scaling)
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
-
 rf = RandomForestClassifier(
-    n_estimators=300,
+    n_estimators=350,
     max_depth=None,
     n_jobs=-1,
     class_weight="balanced_subsample",  # helps with imbalance
