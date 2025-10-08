@@ -1,4 +1,5 @@
 import rasterio
+from rasterio.warp import reproject, Resampling
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -175,4 +176,48 @@ print("Valid proportion:", np.mean(~np.isnan(reflectance))) # how many pixels ar
 print(reflectance.shape)
 # (7, 5000, 5000) (band, y, x). each pixel has a 7 band vector describing vector
 
-np.savez_compressed('outputs/reflectance_016003', hypercube=reflectance, hyper_profile=np.array([profile], dtype=object))
+
+### CLIP CDL HERE
+with rasterio.open("data/raw/landsat/LC09_CU_016003_20241013_20241017_02/LC09_CU_016003_20241013_20241017_02_SR_B1.TIF") as src:
+    # open up one of the landsat bands to get dimensions
+    dst_crs = src.crs # coordinate reference system
+    dst_transform = src.transform # geographic transform (how a pixel maps to each coordinate within the respective crs)
+    dst_height = src.height
+    dst_width  = src.width
+    dst_profile = src.profile
+
+# Align CDL and Reflectance 
+with rasterio.open('data/raw/cdl/2024_30m_cdls/2024_30m_cdls.tif') as src:
+    # 
+    cdl = src.read(1)
+    cdl_crs = src.crs
+    cdl_transform = src.transform
+    cdl_dtype  = src.dtypes[0] # How each value is stored per pixel (int, unisnged 8 bit integer, float, etc)
+    cdl_nodata = src.nodata if src.nodata is not None else 0 # How empty pixels are marked
+
+
+bands, H, W = reflectance.shape
+
+cdl_match = np.full((H,W), cdl_nodata, dtype=cdl_dtype) # create an empty cdl to project the clipped cdl-landsat on to
+
+reproject(
+    source=cdl, 
+    destination=cdl_match,
+    src_transform=cdl_transform, src_crs=cdl_crs,
+    dst_transform=dst_transform, dst_crs=dst_crs,
+    dst_width=dst_width, dst_height=dst_height,
+    resampling=Resampling.nearest  # If the grids dont align perfectly which value should i use, use nearest input pixel
+)
+
+cdl_match = np.where(cdl_match == cdl_nodata, 0, cdl_match)
+print("cdl_match shape:", cdl_match.shape)
+print("unique sample:", np.unique(cdl_match[:100, :100])) 
+print("background %:", (cdl_match == 0).mean() * 100)
+
+# Save both the hypercube and clipped CDL
+out_meta = dst_profile.copy()
+out_meta.update(count=1, dtype=cdl_match.dtype, nodata=0, compress="lzw")
+with rasterio.open("outputs/cdl_2024_aligned_016003.tif", "w", **out_meta) as dst:
+    dst.write(cdl_match, 1)
+
+np.savez_compressed('outputs/reflectance_016003', hypercube=reflectance)
