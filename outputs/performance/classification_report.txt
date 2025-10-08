@@ -1,0 +1,43 @@
+                          precision    recall  f1-score   support
+
+                    Corn      0.739     0.795     0.766     10009
+                 Sorghum      0.872     0.631     0.732       398
+                Soybeans      0.536     0.500     0.518     10030
+               Sunflower      0.680     0.764     0.719      9780
+                  Barley      0.599     0.400     0.480      4227
+             Durum Wheat      0.654     0.439     0.525       431
+            Spring Wheat      0.372     0.370     0.371     10047
+            Winter Wheat      0.685     0.347     0.461      1319
+                     Rye      0.656     0.423     0.514      3398
+                    Oats      0.701     0.315     0.435      1245
+                  Millet      0.615     0.054     0.099       148
+                  Canola      0.578     0.552     0.565     10077
+                Flaxseed      0.521     0.339     0.411       336
+                 Alfalfa      0.620     0.747     0.678     10062
+   Other Hay/Non Alfalfa      0.555     0.316     0.403      2804
+               Buckwheat      0.622     0.149     0.240       188
+              Sugarbeets      0.638     0.599     0.618      9969
+               Dry Beans      0.472     0.489     0.480     10041
+                Potatoes      0.708     0.772     0.739      9359
+             Other Crops      0.664     0.331     0.442       863
+                    Peas      0.520     0.234     0.323      1363
+          Sod/Grass Seed      0.619     0.695     0.655      7577
+    Fallow/Idle Cropland      0.511     0.484     0.497     10000
+                  Grapes      0.500     0.020     0.038       153
+              Open Water      0.713     0.758     0.735      9800
+    Developed/Open Space      0.285     0.307     0.296     10061
+ Developed/Low Intensity      0.381     0.521     0.440     10067
+ Developed/Med Intensity      0.356     0.371     0.363      4358
+Developed/High Intensity      0.532     0.418     0.468      1378
+                  Barren      0.544     0.374     0.443      1908
+        Deciduous Forest      0.539     0.538     0.539      9936
+        Evergreen Forest      0.426     0.056     0.099       409
+            Mixed Forest      0.383     0.101     0.160       814
+       Grassland/Pasture      0.471     0.491     0.481      9975
+          Woody Wetlands      0.402     0.477     0.437     10085
+     Herbaceous Wetlands      0.529     0.403     0.458      9927
+               Triticale      0.756     0.573     0.652       157
+
+                accuracy                          0.540    202699
+               macro avg      0.566     0.437     0.467    202699
+            weighted avg      0.544     0.540     0.536    202699
