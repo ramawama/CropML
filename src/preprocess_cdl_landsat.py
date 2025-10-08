@@ -3,7 +3,9 @@ from rasterio.warp import reproject, Resampling
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-
+from bs4 import BeautifulSoup
+import re
+import json
 
 # Path to landsard folder + out file
 landsat_dir = Path("data/raw/landsat/LC09_CU_016003_20241013_20241017_02")
@@ -221,3 +223,53 @@ with rasterio.open("outputs/cdl_2024_aligned_016003.tif", "w", **out_meta) as ds
     dst.write(cdl_match, 1)
 
 np.savez_compressed('outputs/reflectance_016003', hypercube=reflectance)
+
+# ---- Config ----
+html_file = "data/raw/cdl/2024_30m_cdls/metadata_CDL24_FGDC-STD-001-1998.htm"
+out_json  = "outputs/cdl_code_to_name.json"
+
+# ---- Parse HTML and extract raw code→name pairs ----
+with open(html_file, "r", encoding="utf-8") as f:
+    soup = BeautifulSoup(f, "html.parser")
+
+# concatenate all <pre> blocks (legend + accuracy sections)
+pre_text = "\n".join(tag.get_text("\n") for tag in soup.find_all("pre"))
+
+# match lines like:  "205"   Triticale   OR   5   Soybeans
+pattern = re.compile(r'["“]?(\d{1,3})["”]?\s+([A-Za-z0-9/ &;\'\-\.\,]+)')
+raw_map = {int(k): v for k, v in pattern.findall(pre_text)}
+
+# ---- Clean to keep only true legend entries ----
+def clean_cdl_mapping(raw_map: dict[int, str]) -> dict[int, str]:
+    clean = {}
+    # regex to strip trailing numeric columns (from accuracy tables)
+    trail_nums = re.compile(r"\s+\d+(?:\.\d+)?(?:\s+\d+(?:\.\d+)?)*\s*$")
+    skip_tokens = ("Categorization Code", "Land Cover", "Accuracy", "Error", "User's", "Producer's", "Kappa")
+
+    for code, name in raw_map.items():
+        if not (0 <= code <= 255):
+            continue
+
+        # normalize & strip junk
+        name = name.replace("&amp;", "&").strip()
+        if any(tok.lower() in name.lower() for tok in skip_tokens):
+            continue
+
+        # drop trailing numbers like "… 239 0 0.0"
+        name = trail_nums.sub("", name).strip()
+
+        # must contain letters (avoid numeric-only leftovers)
+        if not re.search(r"[A-Za-z]", name):
+            continue
+
+        clean[code] = name
+
+    return clean
+
+cdl_dict = clean_cdl_mapping(raw_map)
+
+# ---- Save clean mapping ----
+with open(out_json, "w", encoding="utf-8") as f:
+    json.dump(cdl_dict, f, indent=2)
+
+print(f"Saved {len(cdl_dict)} clean classes to {out_json}")
