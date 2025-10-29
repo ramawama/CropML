@@ -3,10 +3,9 @@ import rasterio
 from rasterio.warp import reproject, Resampling
 from scipy.ndimage import binary_erosion
 
-# --- CONFIG ---
 AVIRIS_IMG = "data/raw/aviris/f230912t01p00r10rdn_g/f230912t01p00r10rdn_g_sc01_ort_img"   # AVIRIS orthocorrected file (.hdr in same folder)
-CDL_TIF    = "data/raw/cdl/2023_30m_cdls/2023_30m_cdls.tif"
-OUT_TIF    = "outputs/cdl_2023_to_aviris_footprint.tif"
+CDL_TIF    = "data/raw/cdl/2023_30m_cdls/2023_30m_cdls.tif" # ground truth crop layer
+OUT_TIF    = "outputs/cdl_2023_to_aviris_footprint.tif" # dst file
 ERODE_PIXELS = 1  # set to 0 to disable edge shrink
 
 # --- 1. Open AVIRIS reference ---
