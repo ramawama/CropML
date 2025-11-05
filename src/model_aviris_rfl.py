@@ -153,17 +153,24 @@ plt.tight_layout()
 plt.savefig("outputs/figs/pixel_counts_by_crop.png", dpi=150)
 plt.close()
 
-plt.figure(figsize=(9,5))
-plt.bar(df["Encoded ID"].astype(str), df["Count"])
-plt.title("Pixel Counts by Encoded Label (0..K-1)")
-plt.xlabel("Encoded Label"); plt.ylabel("Pixel Count")
+plt.figure(figsize=(7,7))
+# Use percentages from df (already calculated)
+plt.pie(
+    df["Count"],
+    labels=df["Crop"],
+    autopct="%1.1f%%",
+    startangle=90,
+    counterclock=False
+)
+plt.title("Crop Composition (% of Total Extracted Pixels)")
 plt.tight_layout()
-plt.savefig("outputs/figs/pixel_counts_by_encoded.png", dpi=150)
+plt.savefig("outputs/figs/pixel_share_pie.png", dpi=150)
 plt.close()
+
 
 print("Saved:")
 print(" - outputs/figs/pixel_counts_by_crop.png")
-print(" - outputs/figs/pixel_counts_by_encoded.png")
+print(" - outputs/figs/pixel_share_pie.png")
 
 # # ========= Optional: balanced subsample (per-class cap) =========
 # # Helps avoid orchard classes dominating. Set cap per class (pixels).
