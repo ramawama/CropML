@@ -172,38 +172,3 @@ print("Saved:")
 print(" - outputs/figs/pixel_counts_by_crop.png")
 print(" - outputs/figs/pixel_share_pie.png")
 
-# # ========= Optional: balanced subsample (per-class cap) =========
-# # Helps avoid orchard classes dominating. Set cap per class (pixels).
-# BALANCE_CAP = 200_000  # tweak based on memory/time budget; set None to skip
-# if BALANCE_CAP:
-#     idxs = []
-#     for c in range(len(classes_sorted)):
-#         cls_idx = np.where(y_enc == c)[0]
-#         if cls_idx.size > BALANCE_CAP:
-#             cls_idx = np.random.default_rng(0).choice(cls_idx, BALANCE_CAP, replace=False)
-#         idxs.append(cls_idx)
-#     idxs = np.concatenate(idxs)
-#     X_bal = X_all[idxs]
-#     y_bal = y_enc[idxs]
-#     np.savez_compressed("outputs/train_samples_balanced.npz", X=X_bal, y=y_bal, classes=classes_sorted)
-#     print("✓ Saved balanced subset:", X_bal.shape, "→ outputs/train_samples_balanced.npz")
-
-# ========= Optional: quick RF baseline (sanity check) =========
-# (Skip if you just want the arrays.)
-# try:
-#     from sklearn.model_selection import train_test_split
-#     from sklearn.ensemble import RandomForestClassifier
-#     from sklearn.metrics import classification_report
-
-#     X_use, y_use = (X_bal, y_bal) if BALANCE_CAP else (X_all, y_enc)
-#     Xtr, Xte, ytr, yte = train_test_split(X_use, y_use, test_size=0.2, stratify=y_use, random_state=0)
-
-#     rf = RandomForestClassifier(
-#         n_estimators=400, max_features="sqrt",
-#         class_weight="balanced_subsample",
-#         n_jobs=-1, random_state=0
-#     )
-#     rf.fit(Xtr, ytr)
-#     print(classification_report(yte, rf.predict(Xte), target_names=[str(c) for c in classes_sorted]))
-# except Exception as e:
-#     print("RF sanity check skipped:", e)
