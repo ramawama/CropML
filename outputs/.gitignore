@@ -4,3 +4,6 @@
 !.gitignore
 !performance/
 !performance/**
+
+!figs/
+!models/**
